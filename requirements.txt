@@ -3,3 +3,5 @@ python == 3.12.1
 pandas == 2.1.4
 nba_api == 1.4.1
 requests == 2.31.0
+matplotlib == 3.8.2 
+seaborn== 0.13.0
