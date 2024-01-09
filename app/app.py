@@ -12,36 +12,52 @@ for game in games:
     gameTimeLTZ = parser.parse(game["gameTimeUTC"]).replace(tzinfo=timezone.utc).astimezone(tz=None)
     print(f.format(gameId=game['gameId'], awayTeam=game['awayTeam']['teamName'], homeTeam=game['homeTeam']['teamName'], gameTimeLTZ=gameTimeLTZ))
 
-box = boxscore.BoxScore('0022300467') 
+box = boxscore.BoxScore('0022300511') 
+
 away_stats = box.away_team_stats.get_dict()
 home_stats = box.home_team_stats.get_dict()
 
-df = pd.DataFrame(columns=['teamId','score','freeThrowsPercentage','fieldGoalsPercentage','threePointersPercentage','assists','reboundsTotal','home'])
+df = pd.DataFrame(columns=['FG_PCT_home','FT_PCT_home','FG3_PCT_home','AST_home','REB_home','FG_PCT_away','FT_PCT_away','FG3_PCT_away','AST_away','REB_away'])
+df_per = pd.DataFrame(columns=['home','away'])
 
-#get away stats
-away_stats_list = []
-away_stats_list.append(away_stats['teamId'])
-away_stats_list.append(away_stats['score'])
-away_stats_list.append(away_stats['statistics']['freeThrowsPercentage'])
-away_stats_list.append(away_stats['statistics']['fieldGoalsPercentage'])
-away_stats_list.append(away_stats['statistics']['threePointersPercentage'])
-away_stats_list.append(away_stats['statistics']['assists'])
-away_stats_list.append(away_stats['statistics']['reboundsTotal'])
-away_stats_list.append(0)
+
+stats_list = []
+teams_list = []
 
 #get home stats
-home_stats_list = []
-home_stats_list.append(home_stats['teamId'])
-home_stats_list.append(home_stats['score'])
-home_stats_list.append(home_stats['statistics']['freeThrowsPercentage'])
-home_stats_list.append(home_stats['statistics']['fieldGoalsPercentage'])
-home_stats_list.append(home_stats['statistics']['threePointersPercentage'])
-home_stats_list.append(home_stats['statistics']['assists'])
-home_stats_list.append(home_stats['statistics']['reboundsTotal'])
-home_stats_list.append(1)
+teams_list.append(home_stats['teamId'])
 
-print(home_stats_list)
+stats_list.append(home_stats['statistics']['fieldGoalsPercentage'])
+stats_list.append(home_stats['statistics']['freeThrowsPercentage'])
+stats_list.append(home_stats['statistics']['threePointersPercentage'])
+stats_list.append(home_stats['statistics']['assists'])
+stats_list.append(home_stats['statistics']['reboundsTotal'])
 
-df.loc[len(df)] = away_stats_list
-df.loc[len(df)] = home_stats_list
+#get away stats
+teams_list.append(away_stats['teamId'])
+
+stats_list.append(away_stats['statistics']['fieldGoalsPercentage'])
+stats_list.append(away_stats['statistics']['freeThrowsPercentage'])
+stats_list.append(away_stats['statistics']['threePointersPercentage'])
+stats_list.append(away_stats['statistics']['assists'])
+stats_list.append(away_stats['statistics']['reboundsTotal'])
+
+#getting game time
+s = home_stats['statistics']['minutesCalculated']
+for r in (("PT", ""), ("M", "")):
+    s = s.replace(*r)
+s = 48/(int(s)/5)
+print(s)
+
+
+
+df.loc[len(df)] = stats_list
+df_per.loc[len(df_per)] = teams_list
+print(df)
+
+to_multiply = ['AST_home','REB_home','AST_away','REB_away']
+for x in to_multiply:
+    df[x] *= s
+    df[x] = df[x].round(0)
+
 print(df)
