@@ -34,12 +34,25 @@ def get_boxscore_window(id):
     boxscore.geometry("600x200")
 
     ap = app_functions
-    probs = ap.get_boxscore(id)
+    probs, game_time, scores_colours = ap.get_boxscore(id)
+
+    probs_new, fig = ap.desgin_probs(probs)
+
+    probs_new_teams = probs_new.iloc[0, :].values.tolist()
 
     # A Label widget to show in toplevel
     Label(boxscore, 
-          text =probs).pack()
+          text =game_time).pack()
+    Label(boxscore, 
+          text = "Away Team: " + probs_new_teams[0] + ' Score: ' + str(scores_colours[0])).pack()
+    Label(boxscore, 
+          text = "Home Team: " + probs_new_teams[1] + ' Score: ' + str(scores_colours[1])).pack()
+    canvas = boxscore(fig, master=root)
+    canvas.draw()
+    canvas.get_tk_widget().pack()
+    
 
+    
 
 
 get_today_scoreboard = Button(root, text="get todays games", command = get_scoreboard_window)
