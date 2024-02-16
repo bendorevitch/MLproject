@@ -8,6 +8,8 @@ import pandas as pd
 import pickle
 import tkinter as tk
 
+from team_colours import team_colours
+
 
 class app_functions():
     def get_scoreboard():
@@ -28,13 +30,15 @@ class app_functions():
     def get_boxscore(id):
         box = boxscore.BoxScore(id) 
 
+        #get home and away team stats
         away_stats = box.away_team_stats.get_dict()
         home_stats = box.home_team_stats.get_dict()
-        print(home_stats)
-
+    
+        #create empty dataframe for stats
         df = pd.DataFrame(columns=['FG_PCT_home','FT_PCT_home','FG3_PCT_home','AST_home','REB_home','FG_PCT_away','FT_PCT_away','FG3_PCT_away','AST_away','REB_away'])
         df_per = pd.DataFrame(columns=['away','home'])
 
+        #create empty lists to store stats in
         stats_list = []
         teams_list = []
         scores_colours = []
@@ -68,9 +72,22 @@ class app_functions():
         #get colours
         away_colour= away_stats['teamTricode']
         home_colour = home_stats['teamTricode']
-        scores_colours.append(away_colour)
-        scores_colours.append(home_colour)
 
+        #getting team colours from dict
+        away_colour_code = team_colours[away_colour][0]
+        home_colour_code = team_colours[home_colour][0]
+        #if colours are same get another colour
+        if away_colour_code == home_colour_code:
+            away_colour_code = team_colours[away_colour][1]
+
+        scores_colours.append(away_colour_code)
+        scores_colours.append(home_colour_code)
+
+        #adding stats to df
+        df.loc[len(df)] = stats_list
+        
+        #adding teams to df
+        df_per.loc[len(df_per)] = teams_list
 
         #getting game time
         s = home_stats['statistics']['minutesCalculated']
@@ -84,29 +101,25 @@ class app_functions():
 
         game_time = 'Quater: ' + str(round(quater)) + ' Game Clock: ' + str(minute)
 
-        df.loc[len(df)] = stats_list
-        df_per.loc[len(df_per)] = teams_list
-
+        
+        #treating stats as if game was 48 minutes in (full time)
         to_multiply = ['AST_home','REB_home','AST_away','REB_away']
         for x in to_multiply:
             df[x] *= per_of_time
             df[x] = df[x].round(0)
 
+        #loading in model
         loaded_model = pickle.load(open('model/LogisticRegression.sav', 'rb'))
 
+        #getting win prediction from model
         score = loaded_model.predict_proba(df)
+        
+        #converting score to list
         score_list = score.tolist()
+        
+        #adding score to df
         df_per.loc[len(df_per)] = score_list[0]
-        return df_per, game_time, scores_colours
-    
-    def desgin_probs(df):
-       
-        data = df.iloc[1, :].values.tolist()
-        keys = df.iloc[0, :].values.tolist()
-        
-        palette_color = sns.color_palette('bright') 
 
-        #pd.options.display.float_format = '{:.2%}'.format
-        fig = plt.pie(data, labels=keys, colors=palette_color, autopct='%.0f%%') 
+        print(scores_colours)
         
-        return df, fig
+        return df_per, game_time, scores_colours

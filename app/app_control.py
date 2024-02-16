@@ -3,59 +3,81 @@ from tkinter.ttk import *
 from app_functions import app_functions
 
 
-root = Tk()
-root.geometry("600x200")
-root.title('percent chance of winning')
+class MainApp:
+      def __init__(self, master = None):
+            self.master = master
+      
+            # Calls create method of class MainApp
+            self.create()
 
-def get_scoreboard_window():
-    scoreboard = Toplevel(root)
+      def create(self):
+            get_today_scoreboard = Button(root, text="get todays games", command = self.get_scoreboard_window)
+            get_today_scoreboard.pack()
 
-    scoreboard.title("New Window")
- 
-    # sets the geometry of toplevel
-    scoreboard.geometry("600x200")
+      def get_scoreboard_window(self):
+            scoreboard = Toplevel()
 
-    ap = app_functions
-    sb_date , games, ids = ap.get_scoreboard()
+            scoreboard.title("New Window")
+            
+            # sets the geometry of toplevel
+            scoreboard.geometry("600x200")
 
-    # A Label widget to show in toplevel
-    Label(scoreboard, 
-          text =sb_date).pack()
-    for (item, id) in zip(games, ids):
-        button = Button(scoreboard,text=item,command=lambda x=id :get_boxscore_window(x))
-        button.pack()
+            ap = app_functions
+            sb_date , games, ids = ap.get_scoreboard()
 
-def get_boxscore_window(id):
-    boxscore = Toplevel(root)
+            # A Label widget to show in toplevel
+            Label(scoreboard, 
+                  text =sb_date).pack()
+            for (item, id) in zip(games, ids):
+                  button = Button(scoreboard,text=item,command=lambda x=id : self.get_boxscore_window(x))
+                  button.pack()
 
-    boxscore.title("New Window")
- 
-    # sets the geometry of toplevel
-    boxscore.geometry("600x200")
+      def get_boxscore_window(self, id):
+            boxscore = Toplevel()
 
-    ap = app_functions
-    probs, game_time, scores_colours = ap.get_boxscore(id)
+            boxscore.title("New Window")
+            
+            # sets the geometry of toplevel
+            boxscore.geometry("600x400")
 
-    probs_new, fig = ap.desgin_probs(probs)
+            ap = app_functions
+            probs, game_time, scores_colours = ap.get_boxscore(id)
+            
 
-    probs_new_teams = probs_new.iloc[0, :].values.tolist()
+            probs_new_teams = probs.iloc[0, :].values.tolist()
 
-    # A Label widget to show in toplevel
-    Label(boxscore, 
-          text =game_time).pack()
-    Label(boxscore, 
-          text = "Away Team: " + probs_new_teams[0] + ' Score: ' + str(scores_colours[0])).pack()
-    Label(boxscore, 
-          text = "Home Team: " + probs_new_teams[1] + ' Score: ' + str(scores_colours[1])).pack()
-    canvas = boxscore(fig, master=root)
-    canvas.draw()
-    canvas.get_tk_widget().pack()
-    
+            probs_new_num = probs.iloc[1, :].values.tolist()
 
-    
+            print(probs_new_num)
+
+            # A Label widget to show in toplevel
+            Label(boxscore, 
+                  text =game_time).pack()
+            Label(boxscore, 
+                  text = "Away Team: " + probs_new_teams[0] + ' Score: ' + str(scores_colours[0])).pack()
+            Label(boxscore, 
+                  text = "Home Team: " + probs_new_teams[1] + ' Score: ' + str(scores_colours[1])).pack()
+            self.canvas = Canvas(boxscore)
+            print(scores_colours[2])
+           
+            self.canvas.create_rectangle(100,100,(100 + (probs_new_num[0]*400)),90, fill=scores_colours[2])
+            self.canvas.create_rectangle(((probs_new_num[0]*400)),100,(100 + (probs_new_num[1]*400)),90, fill=scores_colours[3])
+            
+            self.canvas.pack(fill = BOTH, expand = True)
 
 
-get_today_scoreboard = Button(root, text="get todays games", command = get_scoreboard_window)
-get_today_scoreboard.pack()
+if __name__ == "__main__":
+     
+      # initalise app
+      root = Tk()
+      geeks = MainApp(root)
+      
+      # This sets the title to Lines
+      root.title('percent chance of winning')
+      
+      # This sets the geometry and position of window
+      # on the screen
+      root.geometry("600x200")
 
-root.mainloop()
+      # Infinite loop breaks only by interrupt
+      root.mainloop()
