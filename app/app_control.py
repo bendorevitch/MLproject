@@ -50,6 +50,10 @@ class MainApp:
 
             print(probs_new_num)
 
+            end_first_rec = (probs_new_num[0]*400) + 100
+            start_second_rec = end_first_rec 
+            end_second_rec = start_second_rec + (probs_new_num[1]*400) - 100
+
             # A Label widget to show in toplevel
             Label(boxscore, 
                   text =game_time).pack()
@@ -60,8 +64,8 @@ class MainApp:
             self.canvas = Canvas(boxscore)
             print(scores_colours[2])
            
-            self.canvas.create_rectangle(100,100,(100 + (probs_new_num[0]*400)),90, fill=scores_colours[2])
-            self.canvas.create_rectangle(((probs_new_num[0]*400)),100,(100 + (probs_new_num[1]*400)),90, fill=scores_colours[3])
+            self.canvas.create_rectangle(100,100,end_first_rec,90, fill=scores_colours[2])
+            self.canvas.create_rectangle(start_second_rec,100,end_second_rec,90, fill=scores_colours[3])
             
             self.canvas.pack(fill = BOTH, expand = True)
 
