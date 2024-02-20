@@ -15,7 +15,7 @@ class app_functions():
     def get_scoreboard():
         f = "{awayTeam} vs. {homeTeam} @ {gameTimeLTZ}" 
         board = scoreboard.ScoreBoard()
-        game_dates= ("ScoreBoardDate: " + board.score_board_date)
+        game_dates= ("Score Board Date: " + board.score_board_date)
 
         games = board.games.get_dict()
         today_games = []
@@ -25,7 +25,6 @@ class app_functions():
             today_games.append(f.format(awayTeam=game['awayTeam']['teamName'], homeTeam=game['homeTeam']['teamName'], gameTimeLTZ=gameTimeLTZ))
             today_games_id.append(game['gameId'])
         return game_dates ,today_games, today_games_id
-
     
     def get_boxscore(id):
         box = boxscore.BoxScore(id) 
@@ -89,6 +88,9 @@ class app_functions():
         #adding teams to df
         df_per.loc[len(df_per)] = teams_list
 
+        #for displaying original stats
+        df_list = df.loc[0, :].values.tolist()
+
         #getting game time
         s = home_stats['statistics']['minutesCalculated']
         for r in (("PT", ""), ("M", "")):
@@ -101,7 +103,6 @@ class app_functions():
 
         game_time = 'Quater: ' + str(round(quater)) + ' Game Clock: ' + str(minute)
 
-        
         #treating stats as if game was 48 minutes in (full time)
         to_multiply = ['AST_home','REB_home','AST_away','REB_away']
         for x in to_multiply:
@@ -119,7 +120,11 @@ class app_functions():
         
         #adding score to df
         df_per.loc[len(df_per)] = score_list[0]
-
-        print(scores_colours)
         
-        return df_per, game_time, scores_colours
+        return df_per, game_time, scores_colours, df_list
+    
+    def figure_bars(a, b):
+        end_first_rec = (a*400) + 100
+        start_second_rec = end_first_rec 
+        end_second_rec = start_second_rec + (b*400) - 100
+        return end_first_rec, start_second_rec, end_second_rec
